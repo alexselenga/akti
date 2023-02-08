@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Requests\StoreRequest;
+use App\Services\ProductParseService;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,6 +15,32 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get(
+    '/',
+    function () {
+        return view('welcome');
+    }
+);
+
+Route::post(
+    'store',
+    function (StoreRequest $request) {
+        $request->file->storeAs('', 'MyFile.txt');
+
+        $parseService = new ProductParseService();
+        $parseService->put('MyFile.txt', 'MyFile.json');
+
+        return redirect()->route('products');
+    }
+)->name('store');
+
+Route::get(
+    '/products',
+    function () {
+        $parseService = new ProductParseService();
+        $products = $parseService->get('MyFile.json');
+
+        return view('products', ['products' => $products]);
+    }
+)->name('products');
+
